@@ -1,0 +1,9 @@
+---
+layout: post
+title: "It Begins"
+date: 2012-05-10 19:13
+comments: true
+categories: 
+---
+
+{% img http://bsquask.com/images/raspberrypi.jpg %}
