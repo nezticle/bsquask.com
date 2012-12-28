@@ -1,0 +1,39 @@
+---
+layout: post
+title: "The bsquask branch"
+date: 2012-12-28 17:02
+comments: true
+categories: 
+---
+
+You may have noticed that there are 2 branches published in [RaspberryPi-Buildroot](https://github.com/nezticle/RaspberryPi-BuildRoot).  The reason for this is that the master branch is intended to be the minimum set of changes to stock BuildRoot that others can fork for their own projects.  The bsquask branch is where I keep my customized BuildRoot based Linux environment.
+
+## Features Implemented
+I've implemented some neat things in the bsquask branch so far (some of which will get ported to master if it makes sense)
+
+### Upstart
+Rather than using sysinitv or systemd for the system init process (which is the only process started by the Linux kernel and is the parent of all other processes), I've chosen to use [Upstart](http://upstart.ubuntu.com/).  Upstart is event driven, so services are started in terms of what events occur. By converting packages sysinitv style service files to upstart style, I was able to reduce boot times to a console to just 3 seconds.  It's also much easier to write upstart services than it is to write new sysinitv ones.
+
+### Linux kernel 3.6.11
+As of December 27th, 2012, the stable [Raspberry Pi kernel](https://github.com/raspberrypi/linux) is 3.6.11.  I hope to soon pull this into the master branch as well.
+
+### VideoCore with CMA enabled
+With the firmware that corresponds to the 3.6.11 kernel update, we now have the possibility of using a contiguous memory allocator to eliminate the need to set a boot-time split between GPU memory and system RAM.  Now what should happen is that each should only reserve a minimum, and then request more from each other when necessary.  So if you are running an OpenGL application that needs a lot GPU memory, then more memory is requested at runtime by the CMA from the memory pool.
+
+CMA is enabled in the Bsquask branch, but should be probably still be considered experimental. 
+
+### XBox and Wiimote support
+
+The demos that I write for the Raspberry Pi generally use game console controllers so I've built in support for XPad and XWiimote in the the kernel, and have added the user-space libraries to use them.  This includes a custom Qt 5 module I wrote to make using them from Qt 5 easier, as well as a bluetooth daemon and utilities to sync wiimotes.
+
+## Features Planned
+These are the projects I'm currently working on for the Bsquask branch
+
+### Splash screen
+Since Qt 5 can paint directly to the console framebuffer, it's possible to implement dynamic splash screens using Qt 5, QtQuick, and OpenGL.  By listening for Upstart events, its also possible to display the progress of the boot if you wanted.  The splash screen application is started by just adding an Upstart service file.  I have a prototype of this working now, but it really doesn't make sense to have a splash screen when booting only takes 3 seconds.
+
+### Wayland Compositor
+Right now we still boot up to a command prompt.  I tend to disable this and boot strait to a single demo application, but what I plan to do is implement a Wayland compositor using QtWayland which the system will boot into.  This will launch into a simple interface with an application launcher, and application switcher.  That way you will be able to run and switch between multiple applications.  I have prototype of this will will be releasing soon on GitHub.
+
+### Remove Busybox
+I intend to remove Busybox and install the actual util-linux packages.  We have the luxury of lots of system resources with the Raspberry Pi, no need to limit ourself to using Busybox.  I am currently experimenting with configurations for this.
